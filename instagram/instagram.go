@@ -96,6 +96,7 @@ type Parameters struct {
 	Lat          float64
 	Lng          float64
 	Distance     float64
+	Cursor	     string
 }
 
 // Ratelimit specifies API calls limit found in HTTP headers.

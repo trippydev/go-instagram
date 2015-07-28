@@ -7,6 +7,7 @@ package instagram
 
 import (
 	"fmt"
+	"net/url"
 )
 
 // RelationshipsService handles communication with the user's relationships related
@@ -31,13 +32,22 @@ type Relationship struct {
 // passed then it refers to `self` or curret authenticated user.
 //
 // Instagram API docs: http://instagram.com/developer/endpoints/relationships/#get_users_follows
-func (s *RelationshipsService) Follows(userId string) ([]User, *ResponsePagination, error) {
+func (s *RelationshipsService) FollowsPaginated(userId string, opt *Parameters) ([]User, *ResponsePagination, error) {
 	var u string
 	if userId != "" {
 		u = fmt.Sprintf("users/%v/follows", userId)
 	} else {
 		u = "users/self/follows"
 	}
+
+	if opt != nil {
+		params := url.Values{}
+		if opt.Cursor != "" {
+			params.Add("cursor", opt.Cursor)
+		}
+		u += "?" + params.Encode()
+	}
+
 
 	req, err := s.client.NewRequest("GET", u, "")
 	if err != nil {
@@ -58,6 +68,11 @@ func (s *RelationshipsService) Follows(userId string) ([]User, *ResponsePaginati
 
 	return *users, page, err
 }
+
+func (s *RelationshipsService) Follows(userId string) ([]User, *ResponsePagination, error) {
+	return s.FollowsPaginated(userId, nil)
+}
+
 
 // FollowedBy gets the list of users this user is followed by. If empty string is
 // passed then it refers to `self` or curret authenticated user.
